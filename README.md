@@ -1,5 +1,5 @@
 **R Function Name:**  
-# en_test
+# EN_Test
 Function that validates features chosen via elastic net modeling by identifying out-of-sample prediction ability.
 
 **Overview:**  
@@ -8,16 +8,14 @@ the stength of which is determined using a hyperperamater lambda, with a smaller
 and ultimately the model using the lambda value and selected features that produces the lowest mean squared error (MSE) are found. In this way, Elastic Net can be used to identify important 
 features, for example gene expression levels, implicated in clinical parameters (age, bmi, etc.).
 
-One downside of elastic net modeling using common R functions such as cv.glmnet is the variability of the output, as train and test sets are selected randomly. This function reduces variability 
-and increases the robustness of results by repeating elastic net modeling in R using the glmnet package a user-specified number of times, averages the output, and produces a lambda value and set 
-of selected features that produce the lowest MSE across many trials. This function also auto-scales features, uses parallel processing for faster output, and automates useful visualizations of the selected features.
+One downside of elastic net modeling using common R functions such as cv.glmnet is the variability of the output, as train and test sets are selected randomly. This function, in coordination with the EN_Repeat function reduces variability and increases the robustness of results by repeating elastic net modeling in R using the glmnet package a user-specified number of times, averages the output, and produces a lambda value and set of selected features that produce the lowest MSE across many trials. The EN_Repeat function auto-scales features, uses parallel processing for faster output, and automates useful visualizations of the selected features. Using this output, EN_Test validates the optimized lambda and selected features chosen using 80% of the provided dataset by examining their out-of-sample prediction ability on the remaining 20% of the provided dataset. 
 
 
 **Usage:**  
-EN_Repeat_Results <- EN_Repeat(clin_df, protein_list, control_list, trait_list, alpha, iterations, heatmap=FALSE)
+EN_Repeat_Results <- EN_Test(clin_df, protein_list, control_list, trait_list, alpha, iterations, trait1=FALSE, label1=NA, heatmap = FALSE)
 
 **Arguments**  
-| Parameter       | Type        | Description                                                                                             |
+| Parameter      | Type        | Description                                                                                             |
 |----------------|-------------|---------------------------------------------------------------------------------------------------------|
 | `clin_df `     | `dataframe` | Table of microarray data containing gene expression values and covariates by columns, sample IDs by row |
 | `protein_list` | `vector `   | Vector of genes from which to perform feature selection, and any continuous covariates                  |
@@ -25,16 +23,25 @@ EN_Repeat_Results <- EN_Repeat(clin_df, protein_list, control_list, trait_list, 
 | `trait_list`   | `vector `   | Vector of continuous traits for which to select implicated features                                     |
 | `alpha`        | `numeric `  | Number indicating hyperparameter alpha (0 for ridge, 1 for lasso, in-between for Elastic Net)           |
 | `interations`  | `numeric `  | Number indicating the number of times the analysis will be run                                          |
+| `trait1`       | `string`    | If supplied, individual parameter examined and scatterplot (oberved vs. predicted values) produced.     |
+| `label1`       | `string `   | If supplied, a label used for the individual parameter graph label.                                     |
 | `heatmap`      | `boolean `  | Boolean value determining if a heatmap displaying effect size by feature and trait will be returned     |
 
 **Return Values:**  
-- Coef is a table showing the penalized effect size of each feature for each supplied trait.
-- Lambda is a table showing the supplied alpha and optimized lambda across many runs for each parameter of the trait_list.
-- Heatmap is a graphical representation of the penalized effect size of each feature for each supplied trait.
+- cor_table is a table showing the correlation between the observed and predicted values for the test set for each suppled paramter, ordered by p-value.
+- scatter is a scatterplot for a single selected parameter, if supplied, showing the correlation between the observed and predicted values for the test set. 
 
-<p align="center">
-  <img src="images/Example_heatmap2.JPG" alt="Example Image of Selected Features" width="500">
-</p>
+| Trait      | Cor        | Pval       | fdr        | method     |
+|----------------|-------------|---------------------------------------------------------------------------------------------------------|
+| `clin_df `     | `dataframe` | Table of microarray data containing gene expression values and covariates by columns, sample IDs by row |
+| `protein_list` | `vector `   | Vector of genes from which to perform feature selection, and any continuous covariates                  |
+| `control_list` | `vector `   | Vector of categorical covariates                                                                        |
+| `trait_list`   | `vector `   | Vector of continuous traits for which to select implicated features                                     |
+| `alpha`        | `numeric `  | Number indicating hyperparameter alpha (0 for ridge, 1 for lasso, in-between for Elastic Net)           |
+| `interations`  | `numeric `  | Number indicating the number of times the analysis will be run                                          |
+| `trait1`       | `string`    | If supplied, individual parameter examined and scatterplot (oberved vs. predicted values) produced.     |
+| `label1`       | `string `   | If supplied, a label used for the individual parameter graph label.                                     |
+| `heatmap`      | `boolean `  | Boolean value determining if a heatmap displaying effect size by feature and trait will be returned     |
 
 - IVSum is a bar graph respresenting the number of selected features for each supplied parameter. Example image shows 100 possible features and 2 covariates.
 
@@ -49,7 +56,7 @@ heatmaply
 doParallel
 
 **Notes**  
-This function will produce an error if the heatmap functionality is set to true and any of the parameters have 0 selected features. If this error occurs, set heatmap to false.
+This function will produce an error if the heatmap functionality is set to true and any of the parameters have 0 selected features. If this error occurs, set heatmap to false, or turn off denogram clustering for the heatmaply function. 
 
 **Author**  
 Bradley Olinger, PhD  
