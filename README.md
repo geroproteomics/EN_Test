@@ -28,22 +28,16 @@ EN_Repeat_Results <- EN_Test(clin_df, protein_list, control_list, trait_list, al
 | `heatmap`      | `boolean `  | Boolean value determining if a heatmap displaying effect size by feature and trait will be returned     |
 
 **Return Values:**  
-- cor_table is a table showing the correlation between the observed and predicted values for the test set for each suppled paramter, ordered by p-value.
-- scatter is a scatterplot for a single selected parameter, if supplied, showing the correlation between the observed and predicted values for the test set. 
+- cor_table is a table showing the correlation between the observed and predicted values for the test set for each suppled parameter, along with p-value, with false dicovery rate correction.
 
-| Trait      | Cor        | Pval       | fdr        | method     |
-|----------------|-------------|---------------------------------------------------------------------------------------------------------|
-| `clin_df `     | `dataframe` | Table of microarray data containing gene expression values and covariates by columns, sample IDs by row |
-| `protein_list` | `vector `   | Vector of genes from which to perform feature selection, and any continuous covariates                  |
-| `control_list` | `vector `   | Vector of categorical covariates                                                                        |
-| `trait_list`   | `vector `   | Vector of continuous traits for which to select implicated features                                     |
-| `alpha`        | `numeric `  | Number indicating hyperparameter alpha (0 for ridge, 1 for lasso, in-between for Elastic Net)           |
-| `interations`  | `numeric `  | Number indicating the number of times the analysis will be run                                          |
-| `trait1`       | `string`    | If supplied, individual parameter examined and scatterplot (oberved vs. predicted values) produced.     |
-| `label1`       | `string `   | If supplied, a label used for the individual parameter graph label.                                     |
-| `heatmap`      | `boolean `  | Boolean value determining if a heatmap displaying effect size by feature and trait will be returned     |
+| Trait      | Cor        | Pval       | fdr        | method      |
+|------------|------------|------------|------------|-------------|
+| Paramter 1 | 0.46       | 0.0003     | 0.0041     | Elastic Net |
+| Paramter 2 | 0.39       | 0.0039     | 0.0099     | Elastic Net |
+| Paramter 3 | 0.33       | 0.014      | 0.0123     | Elastic Net |
+| Paramter 4 | 0.21       | 0.067      | 0.0910     | Elastic Net |
 
-- IVSum is a bar graph respresenting the number of selected features for each supplied parameter. Example image shows 100 possible features and 2 covariates.
+- scatter is a scatterplot for a single selected parameter, if supplied, showing the observed and predicted values for the test set of this parameter. 
 
 <p align="center">
   <img src="images/Example_ivsum.JPG" alt="Example Image of Selected Features" width="500">
@@ -56,7 +50,7 @@ heatmaply
 doParallel
 
 **Notes**  
-This function will produce an error if the heatmap functionality is set to true and any of the parameters have 0 selected features. If this error occurs, set heatmap to false, or turn off denogram clustering for the heatmaply function. 
+This function will produce an error if the heatmap functionality is set to true and any of the parameters have 0 selected features. If this error occurs, set heatmap to false, or turn off denogram clustering for the heatmaply function in EN_Repeat. 
 
 **Author**  
 Bradley Olinger, PhD  
