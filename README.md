@@ -32,10 +32,10 @@ EN_Repeat_Results <- EN_Test(clin_df, protein_list, control_list, trait_list, al
 
 | Trait      | Cor        | Pval       | fdr        | method      |
 |------------|------------|------------|------------|-------------|
-| Paramter 1 | 0.46       | 0.0003     | 0.0041     | Elastic Net |
-| Paramter 2 | 0.39       | 0.0039     | 0.0099     | Elastic Net |
-| Paramter 3 | 0.33       | 0.014      | 0.0123     | Elastic Net |
-| Paramter 4 | 0.21       | 0.067      | 0.0910     | Elastic Net |
+| Parameter 1 | 0.46       | 0.0003     | 0.0041     | Elastic Net |
+| Parameter 2 | 0.39       | 0.0039     | 0.0099     | Elastic Net |
+| Parameter 3 | 0.33       | 0.014      | 0.0123     | Elastic Net |
+| Parameter 4 | 0.21       | 0.067      | 0.0910     | Elastic Net |
 
 - scatter is a scatterplot for a single selected parameter, if supplied, showing the observed and predicted values for the test set of this parameter. 
 
