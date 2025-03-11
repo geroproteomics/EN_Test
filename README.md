@@ -40,7 +40,7 @@ EN_Repeat_Results <- EN_Test(clin_df, protein_list, control_list, trait_list, al
 - scatter is a scatterplot for a single selected parameter, if supplied, showing the observed and predicted values for the test set of this parameter. 
 
 <p align="center">
-  <img src="images/Example_ivsum.JPG" alt="Example Image of Selected Features" width="500">
+  <img src="images/Example_Scatterplot_1.JPG" alt="Example Image of Selected Features" width="500">
 </p>
 
 **Dependencies:**  
