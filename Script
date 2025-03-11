@@ -1,0 +1,117 @@
+en_test <- function(clin_df, protein_list, control_list, trait_list, alpha, iterations, trait1=FALSE, label1=NA, heatmap = FALSE){
+
+  #set seed for reproducibility
+  set.seed(1)
+
+  # Training: 80%; Test: 20%
+  inTrain <- createDataPartition(1:nrow(clin_df), p = .80, list = FALSE)[,1]
+
+  #divide data into 80% train and 20% test sets
+  clin_df_train <- clin_df[inTrain,]
+
+  #use en_repeat to generate list of optimized lambdas for each trait (use only 80% training data)
+  en <- en_repeat(clin_df_train, protein_list, control_list, trait_list, alpha, iterations, heatmap = heatmap)
+  df_lambda <- en$lambda
+
+  #separate data into clinical traits and proteins
+  # Features: separate into train(80%) and test(20%) sets
+  x <- clin_df[,c(control_list,protein_list)]
+  # Target variable
+  y <- clin_df[,trait_list]
+  x_train <- x[ inTrain,]
+  x_test  <- x[-inTrain,]
+  y_train <- y[ inTrain,]
+  y_test  <- y[-inTrain,]
+
+  #loop through all clinical traits; find correlation between observed and predicted traits
+  #df to hold values
+  traits_act_pred <- as.data.frame(matrix(NA,ncol=5,nrow=length(trait_list)))
+  colnames(traits_act_pred) <- c("trait","cor","pval","fdr","method")
+  rownames(traits_act_pred) <- trait_list
+  traits_act_pred[,"trait"] <- trait_list
+  traits_act_pred[,"method"] <- rep("en",length(trait_list))
+  for(i in trait_list){
+    #subset to only rows with trait listed
+    proteins_subset <- x_train[complete.cases(y_train[,i]),c(control_list,protein_list)]
+    #subset to one clinical trait
+    clin_subset <- y_train[complete.cases(y_train[,i]),i]
+    #scale clinical trait
+    clin_subset <- scale(clin_subset)
+    colnames(clin_subset) <- i
+    #scale proteins and continuous controls
+    for(val2 in protein_list){
+      proteins_subset[,val2] <- scale(proteins_subset[,val2])
+    }
+    #create glmnet model using supplied alpha
+    cvfit <- cv.glmnet(as.matrix(proteins_subset),unlist(clin_subset), standardize=FALSE, alpha = alpha)
+
+    #find predicted values
+    #subset to only rows with trait listed
+    proteins_subset <- x_test[complete.cases(y_test[,i]),c(control_list,protein_list)]
+    #scale proteins and continuous controls
+    for(val2 in protein_list){
+      proteins_subset[,val2] <- scale(proteins_subset[,val2])
+    }
+    #subset to one clinical trait
+    clin_subset <- y_test[complete.cases(y_test[,i]),i]
+    #scale clinical trait
+    clin_subset <- scale(clin_subset)
+    colnames(clin_subset) <- i
+    #predict test clinical trait values using optimized lambda/predictors
+    pred <- predict(cvfit, newx = as.matrix(proteins_subset), s = df_lambda[i,"lambda"])
+    #find correlation between observed and predicted values
+    test <- cor.test(clin_subset[,i], pred, method="spearman", exact = FALSE)
+    #fill correlation
+    traits_act_pred[i,"cor"] <- test$estimate[[1]]
+    #fill p-val
+    traits_act_pred[i,"pval"] <- as.numeric(test$p.value)
+    #if single trait is selected, save both pred and obs values for single trait scatterplot
+    if(i == trait1){
+      pred1 <- pred
+      obs1 <- clin_subset[,i]
+    }
+  }
+
+  #convert to dataframe
+  traits_act_pred <- as.data.frame(traits_act_pred)
+  #re-order by p-val
+  traits_act_pred <- traits_act_pred[order(traits_act_pred$pval),]
+  #find false discovery rate
+  traits_act_pred$fdr <- p.adjust(traits_act_pred$pval, method = "fdr", n = nrow(traits_act_pred))
+
+  #if single trait is selected for closer analysis, create scatterplot showing just this one trait oberved vs. predicted values
+  if(!is.na(trait1)){
+  ##single trait testing
+  #df to hold predicted and actual values
+  ws_df <- as.data.frame(matrix(NA,ncol=2,nrow=length(pred1)))
+  colnames(ws_df) <- c("actual","predicted")
+  ws_df$actual <- obs1
+  ws_df$predicted <- pred1
+
+  ###begin generate total least squares regression line for plot
+  spearman_rho <- cor.test(ws_df$actual, y=ws_df$predicted, use="complete.obs", method="spearman",exact = FALSE)$estimate #rho value
+  spearman_p <- cor.test(ws_df$actual, y=ws_df$predicted, use="complete.obs", method="spearman",exact = FALSE)$p.value #p-value
+  r <- prcomp(~ws_df$actual+ws_df$predicted  )
+  slope_tls <- r$rotation[2,1] / r$rotation[1,1] #slope of line
+  int <- r$center[2] - slope_tls*r$center[1] #intercept of line
+  ###end generate total least squares line
+
+  #create correlation plot of chosen trait predicted vs observed values
+  p <- ggplot(data=ws_df, aes(x = actual, y = predicted)) + geom_point(size=1.5) +
+    theme_classic() +
+    geom_abline(intercept=int, slope=slope_tls,lwd=1) +
+    ggtitle(paste(label1," Observed and Predicted",sep=""))+
+    ylab(paste("Predicted ",label1," (Z-Score)", sep="")) +
+    xlab(paste("Observed ",label1," (Z-Score)", sep=""))+
+    theme_minimal(base_size=20) +
+    theme(axis.text=element_text(size=16),plot.title = element_text(hjust = 0.5))
+  p
+
+  list <- list("cor_table" = traits_act_pred, "scatter" = p)
+  return(list)
+  }
+  #if no single trait is selected, return table of correltations between actual and predicted values for each trait.
+  if(is.na(trait1)){
+    return(traits_act_pred)
+  }
+}
