@@ -21,7 +21,7 @@ EN_Repeat_Results <- EN_Test(clin_df, protein_list, control_list, trait_list, al
 | `control_list` | `vector `   | Vector of categorical covariates                                                                        |
 | `trait_list`   | `vector `   | Vector of continuous traits for which to select implicated features                                     |
 | `alpha`        | `numeric `  | Number indicating hyperparameter alpha (0 for ridge, 1 for lasso, in-between for Elastic Net)           |
-| `interations`  | `numeric `  | Number indicating the number of times the analysis will be run                                          |
+| `iterations`   | `numeric `  | Number indicating the number of times the analysis will be run                                          |
 | `trait1`       | `string`    | If supplied, individual parameter examined and scatterplot (oberved vs. predicted values) produced.     |
 | `label1`       | `string `   | If supplied, a label used for the individual parameter graph label.                                     |
 | `heatmap`      | `boolean `  | Boolean value determining if a heatmap displaying effect size by feature and trait will be returned     |
