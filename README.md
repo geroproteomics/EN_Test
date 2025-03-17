@@ -43,7 +43,7 @@ EN_Repeat_Results <- EN_Test(clin_df, protein_list, control_list, trait_list, al
 </p>
 
 **Dependencies:**  
-EN_Repeat Function  
+EN_Repeat Function: https://github.com/geroproteomics/EN_Repeat  
 glmnet  
 ggplot2  
 heatmaply  
