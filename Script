@@ -10,7 +10,7 @@ en_test <- function(clin_df, protein_list, control_list, trait_list, alpha, iter
   clin_df_train <- clin_df[inTrain,]
 
   #use en_repeat to generate list of optimized lambdas for each trait (use only 80% training data)
-  en <- en_repeat(clin_df_train, protein_list, control_list, trait_list, alpha, iterations, heatmap = heatmap)
+  en <- EN_Repeat(clin_df_train, protein_list, control_list, trait_list, alpha, iterations, heatmap = heatmap)
   df_lambda <- en$lambda
 
   #separate data into clinical traits and proteins
@@ -29,7 +29,7 @@ en_test <- function(clin_df, protein_list, control_list, trait_list, alpha, iter
   colnames(traits_act_pred) <- c("trait","cor","pval","fdr","method")
   rownames(traits_act_pred) <- trait_list
   traits_act_pred[,"trait"] <- trait_list
-  traits_act_pred[,"method"] <- rep("en",length(trait_list))
+  traits_act_pred[,"method"] <- rep("Elastic Net",length(trait_list))
   for(i in trait_list){
     #subset to only rows with trait listed
     proteins_subset <- x_train[complete.cases(y_train[,i]),c(control_list,protein_list)]
@@ -110,7 +110,7 @@ en_test <- function(clin_df, protein_list, control_list, trait_list, alpha, iter
   list <- list("cor_table" = traits_act_pred, "scatter" = p)
   return(list)
   }
-  #if no single trait is selected, return table of correltations between actual and predicted values for each trait.
+  #if no single trait is selected, return table of correlations between actual and predicted values for each trait.
   if(is.na(trait1)){
     return(traits_act_pred)
   }
